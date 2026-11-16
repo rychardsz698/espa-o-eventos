@@ -301,13 +301,15 @@ app.post('/api/users', asyncRoute(async (req, res) => {
   res.json({ ok: true });
 }));
 
-// Arquivos do site
-const publicDir = path.join(__dirname, 'public');
+
+ 
+ // Arquivos do site: index.html na raiz do projeto
+const publicDir = __dirname;
 
 app.use(express.static(publicDir));
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(publicDir, 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Inicialização
