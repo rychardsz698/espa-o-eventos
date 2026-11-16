@@ -1,0 +1,15 @@
+{
+  "name": "meu-espaco",
+  "version": "1.0.0",
+  "description": "Plataforma Meu Espaço - anúncio e locação de espaços para eventos (armazenamento local em arquivo JSON)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
