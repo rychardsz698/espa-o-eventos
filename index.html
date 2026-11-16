@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Espaço - Encontre e Anuncie Espaços para Eventos</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bondi: {
+                            50: '#f0f9fb',
+                            100: '#e0f3f7',
+                            500: '#0095B6',
+                            600: '#007a96',
+                            700: '#005f76',
+                        },
+                        aqua: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#2EC4B6',
+                            600: '#00A896',
+                            700: '#028090',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bondi-aqua {
+            background: linear-gradient(135deg, #0095B6 0%, #2EC4B6 100%);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #0095B6 0%, #2EC4B6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col text-slate-800 bg-white">
+
+    <!-- Notifications Toast -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- MAIN NAVBAR (Visible in Client/Owner views) -->
+    <header id="main-header" class="hidden bg-white border-b border-slate-100 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <!-- Logo -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="app.showWelcomeScreen()">
+                    <div class="w-11 h-11 rounded-2xl gradient-bondi-aqua flex items-center justify-center text-white shadow-md shadow-bondi-500/20">
+                        <i class="fa-solid fa-house-circle-check text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="text-2xl font-extrabold tracking-tight text-gradient">Meu Espaço</span>
+                        <span class="block text-[10px] font-medium tracking-widest text-slate-400 uppercase">Locação Facilitada</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs Switcher -->
+                <div class="bg-slate-100 p-1 rounded-full flex items-center border border-slate-200/80 max-w-xs w-full sm:w-auto">
+                    <button id="mode-btn-client" onclick="app.switchRole('client')" class="flex-1 sm:flex-initial px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        Quero Alugar
+                    </button>
+                    <button id="mode-btn-owner" onclick="app.switchRole('owner')" class="flex-1 sm:flex-initial px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-key"></i>
+                        Sou Locador
+                    </button>
+                </div>
+
+                <!-- User Profile Action Header -->
+                <div class="hidden md:flex items-center gap-4">
+                    <button onclick="app.showWelcomeScreen()" class="text-xs text-slate-500 hover:text-bondi-600 font-semibold transition flex items-center gap-1.5 mr-2">
+                        <i class="fa-solid fa-arrow-left"></i> Início
+                    </button>
+                    <div id="user-status-area">
+                        <!-- Dynamic user profile badge rendered via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex flex-col">
+
+        <!-- ======================================================== -->
+        <!-- SECTION 1: TELA DE ENTRADA / LANDING INITIAL -->
+        <!-- ======================================================== -->
+        <section id="view-welcome-screen" class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50 relative overflow-hidden">
+            <!-- Decorative background elements -->
+            <div class="absolute -top-24 -left-24 w-96 h-96 bg-bondi-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-aqua-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="max-w-4xl w-full text-center relative z-10 space-y-8">
+                <!-- Branding Header -->
+                <div class="space-y-3">
+                    <div class="w-20 h-20 rounded-3xl gradient-bondi-aqua text-white flex items-center justify-center text-3xl mx-auto shadow-xl shadow-bondi-500/20">
+                        <i class="fa-solid fa-house-circle-check"></i>
+                    </div>
+                    <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-800">
+                        Bem-vindo ao <span class="text-gradient">Meu Espaço</span>
+                    </h1>
+                    <p class="text-slate-500 text-base sm:text-lg max-w-xl mx-auto font-normal">
+                        A plataforma que conecta proprietários aos eventos mais inesquecíveis. Como você deseja continuar hoje?
+                    </p>
+                </div>
+
+                <!-- Dual Main Choice Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto pt-4">
+                    <!-- Option A: Sou Locador -->
+                    <div onclick="app.selectWelcomeOption('owner')" class="group bg-white p-8 rounded-3xl border-2 border-slate-200/80 hover:border-bondi-500 shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer text-left flex flex-col justify-between transform hover:-translate-y-1">
+                        <div>
+                            <div class="w-14 h-14 rounded-2xl bg-bondi-50 text-bondi-600 group-hover:bg-bondi-500 group-hover:text-white flex items-center justify-center text-2xl mb-6 transition-colors duration-300">
+                                <i class="fa-solid fa-key"></i>
+                            </div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-bondi-600">Para Proprietários</span>
+                            <h2 class="text-2xl font-bold text-slate-800 mt-1 mb-2">Sou Locador</h2>
+                            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-6">
+                                Anuncie seus imóveis, escolha quais eventos aceitar, gerencie seu calendário de disponibilidade e receba contatos diretos.
+                            </p>
+                        </div>
+                        <div class="flex items-center text-sm font-bold text-bondi-600 group-hover:text-bondi-700 gap-2">
+                            <span>Acessar Painel do Locador</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+
+                    <!-- Option B: Quero Alugar um Espaço -->
+                    <div onclick="app.selectWelcomeOption('client')" class="group bg-white p-8 rounded-3xl border-2 border-slate-200/80 hover:border-aqua-500 shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer text-left flex flex-col justify-between transform hover:-translate-y-1">
+                        <div>
+                            <div class="w-14 h-14 rounded-2xl bg-aqua-50 text-aqua-600 group-hover:bg-aqua-500 group-hover:text-white flex items-center justify-center text-2xl mb-6 transition-colors duration-300">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-aqua-600">Para Clientes / Eventos</span>
+                            <h2 class="text-2xl font-bold text-slate-800 mt-1 mb-2">Quero Alugar um Espaço</h2>
+                            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-6">
+                                Explore chácaras, salões e lofts. Filtre por localização, preço e capacidade. Navegue livremente e negocie com o dono.
+                            </p>
+                        </div>
+                        <div class="flex items-center text-sm font-bold text-aqua-600 group-hover:text-aqua-700 gap-2">
+                            <span>Explorar Locais Disponíveis</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 2: ÁREA DO CLIENTE - CATÁLOGO E BUSCA -->
+        <!-- ======================================================== -->
+        <section id="view-client-catalog" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+            
+            <!-- Banner / Hero -->
+            <div class="relative rounded-3xl gradient-bondi-aqua text-white p-6 sm:p-10 mb-8 shadow-xl shadow-bondi-500/10 overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 opacity-10 text-white pointer-events-none">
+                    <i class="fa-solid fa-campground text-[260px]"></i>
+                </div>
+                <div class="relative z-10 max-w-2xl">
+                    <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full font-semibold backdrop-blur-md mb-3 inline-block">
+                        Encontre o local ideal
+                    </span>
+                    <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight mb-2">
+                        Seu evento inesquecível começa aqui.
+                    </h1>
+                    <p class="text-white/90 text-sm sm:text-base font-light">
+                        Procure por casamentos, aniversários, reuniões corporativas ou momentos de lazer com facilidade.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Sugestões de Destaque / Carrossel Rápido -->
+            <div class="mb-8">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+                    <i class="fa-solid fa-star text-amber-400"></i> Sugestões em Destaque
+                </h3>
+                <div id="featured-spaces-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Inserido dinamicamente via JS -->
+                </div>
+            </div>
+
+            <!-- Painel de Filtros Avançados -->
+            <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-md mb-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Localização -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Localização</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-location-dot absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="filter-location" oninput="app.filterSpaces()" placeholder="Cidade ou Bairro..." class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-bondi-500 transition">
+                        </div>
+                    </div>
+
+                    <!-- Tipo de Evento -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Tipo de Evento</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-glass-cheers absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <select id="filter-event-type" onchange="app.filterSpaces()" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-bondi-500 transition appearance-none">
+                                <option value="">Todos os Eventos</option>
+                                <option value="Casamento">Casamentos</option>
+                                <option value="Aniversário">Aniversários / Festas</option>
+                                <option value="Corporativo">Corporativo / Workshops</option>
+                                <option value="Formatura">Formaturas</option>
+                                <option value="Chá de Bebê">Chá de Bebê / Revelação</option>
+                                <option value="Reunião Familiar">Reunião Familiar / Churrasco</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Capacidade Mínima -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Capacidade de Pessoas</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-users absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <select id="filter-capacity" onchange="app.filterSpaces()" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-bondi-500 transition appearance-none">
+                                <option value="0">Qualquer capacidade</option>
+                                <option value="30">Até 30 pessoas</option>
+                                <option value="80">50 a 80 pessoas</option>
+                                <option value="150">100 a 150 pessoas</option>
+                                <option value="300">Mais de 200 pessoas</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Valor Máximo da Diária -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Diária Máxima</label>
+                            <span id="price-val-display" class="text-xs font-bold text-bondi-600">R$ 5.000</span>
+                        </div>
+                        <input type="range" id="filter-price-range" min="300" max="5000" step="100" value="5000" oninput="app.updatePriceLabel(this.value); app.filterSpaces();" class="w-full accent-bondi-500 cursor-pointer h-2 bg-slate-200 rounded-lg">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cabeçalho da Lista -->
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-building text-bondi-500"></i>
+                    Todos os Espaços
+                </h2>
+                <span id="results-count" class="text-xs font-semibold text-slate-500">Mostrando 0 opções</span>
+            </div>
+
+            <!-- Grid de Espaços -->
+            <div id="spaces-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Renderizado via JS -->
+            </div>
+            
+            <div id="no-results" class="hidden text-center py-16 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+                <i class="fa-solid fa-ghost text-4xl text-slate-300 mb-3"></i>
+                <h3 class="text-lg font-semibold text-slate-600">Nenhum espaço encontrado</h3>
+                <p class="text-sm text-slate-400 mt-1">Ajuste seus filtros para encontrar outros imóveis.</p>
+                <button onclick="app.clearFilters()" class="mt-4 px-4 py-2 bg-bondi-500 text-white rounded-xl text-xs font-bold hover:bg-bondi-600 transition">
+                    Limpar Filtros
+                </button>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 3: VISUALIZAÇÃO DETALHADA DO ESPAÇO -->
+        <!-- ======================================================== -->
+        <section id="view-space-detail" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+            <button onclick="app.switchView('client-catalog')" class="mb-6 inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-bondi-600 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition">
+                <i class="fa-solid fa-arrow-left"></i> Voltar para busca de espaços
+            </button>
+
+            <div id="space-detail-container">
+                <!-- Conteúdo renderizado dinamicamente pelo JS -->
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 4: PERFIL DO CLIENTE & HISTÓRICO DE RESERVAS -->
+        <!-- ======================================================== -->
+        <section id="view-client-profile" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+            <div class="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800">Painel do Cliente</h1>
+                    <p class="text-xs text-slate-500 mt-0.5">Acompanhe suas conversas com os proprietários e visualize negócios fechados.</p>
+                </div>
+                <div class="bg-bondi-50 text-bondi-700 px-4 py-2.5 rounded-2xl border border-bondi-100 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-bondi-500 text-white flex items-center justify-center font-bold text-lg" id="client-avatar-letter">
+                        C
+                    </div>
+                    <div>
+                        <span class="block text-sm font-bold text-slate-800" id="client-profile-name">Cliente</span>
+                        <span class="block text-xs text-slate-500" id="client-profile-email">cliente@email.com</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Abas do Cliente -->
+            <div class="flex border-b border-slate-200 mb-6">
+                <button onclick="app.switchClientTab('chats')" id="tab-btn-chats" class="px-6 py-3 font-semibold text-xs sm:text-sm border-b-2 border-bondi-500 text-bondi-600 flex items-center gap-2">
+                    <i class="fa-solid fa-comments"></i> Conversas com Locadores
+                </button>
+                <button onclick="app.switchClientTab('bookings')" id="tab-btn-bookings" class="px-6 py-3 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check"></i> Negócios Fechados / Reservas
+                </button>
+            </div>
+
+            <!-- Aba 1: Chat do Cliente -->
+            <div id="client-tab-chats">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden min-h-[500px]">
+                    <div class="border-r border-slate-100 p-4 bg-slate-50" id="client-chats-list">
+                        <!-- Renderizado via JS -->
+                    </div>
+                    <div class="lg:col-span-2 flex flex-col h-[550px] bg-white" id="client-active-chat-box">
+                        <div class="flex-1 flex items-center justify-center text-slate-400 text-xs">
+                            Selecione uma conversa para ver as mensagens
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba 2: Reservas Confirmadas -->
+            <div id="client-tab-bookings" class="hidden">
+                <div id="client-bookings-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Renderizado via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 5: ÁREA DO PROPRIETÁRIO / LOCADOR -->
+        <!-- ======================================================== -->
+        <section id="view-owner-dashboard" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+            
+            <!-- Restrição para usuários não autenticados como Locador -->
+            <div id="owner-auth-guard" class="hidden text-center py-16 max-w-md mx-auto bg-white p-8 rounded-3xl border border-slate-200 shadow-xl">
+                <div class="w-16 h-16 rounded-2xl gradient-bondi-aqua text-white flex items-center justify-center text-2xl mx-auto mb-4 shadow-md">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Acesso Exclusivo do Locador</h2>
+                <p class="text-xs text-slate-500 mb-6 leading-relaxed">Você precisa estar conectado em uma conta de locador para registrar imóveis, atualizar agendas e responder clientes.</p>
+                <button onclick="app.openAuthModal('owner')" class="w-full py-3.5 gradient-bondi-aqua text-white font-bold rounded-xl shadow-md hover:opacity-95 transition text-sm">
+                    Entrar ou Criar Conta de Locador
+                </button>
+            </div>
+
+            <!-- Conteúdo Principal do Painel de Proprietário -->
+            <div id="owner-content-panel" class="hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800">Painel do Locador</h1>
+                        <p class="text-xs text-slate-500">Gerencie seus imóveis, agendas e contatos em um só lugar.</p>
+                    </div>
+                    <div>
+                        <button onclick="app.openSpaceModal()" class="px-5 py-2.5 gradient-bondi-aqua text-white rounded-xl text-xs font-bold shadow-md hover:opacity-95 transition flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Cadastrar Novo Espaço
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Abas de Navegação Interna -->
+                <div class="flex border-b border-slate-200 mb-6 overflow-x-auto custom-scrollbar">
+                    <button onclick="app.switchOwnerTab('spaces')" id="owner-tab-spaces" class="px-6 py-3 font-semibold text-xs sm:text-sm border-b-2 border-bondi-500 text-bondi-600 flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-building-user"></i> Meus Espaços
+                    </button>
+                    <button onclick="app.switchOwnerTab('calendar')" id="owner-tab-calendar" class="px-6 py-3 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-calendar-days"></i> Gestão do Calendário
+                    </button>
+                    <button onclick="app.switchOwnerTab('messages')" id="owner-tab-messages" class="px-6 py-3 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-comments"></i> Central de Mensagens
+                    </button>
+                    <button onclick="app.switchOwnerTab('financial')" id="owner-tab-financial" class="px-6 py-3 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-wallet"></i> Painel Financeiro
+                    </button>
+                </div>
+
+                <!-- Painel 1: Lista e Gestão de Espaços -->
+                <div id="owner-panel-spaces">
+                    <div id="owner-spaces-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Renderizado via JS -->
+                    </div>
+                </div>
+
+                <!-- Painel 2: Gestão do Calendário Interativo -->
+                <div id="owner-panel-calendar" class="hidden">
+                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Selecione o Imóvel para Gerenciar Agenda:</label>
+                                <select id="calendar-space-select" onchange="app.renderOwnerCalendar()" class="bg-slate-50 border border-slate-300 rounded-xl px-4 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:border-bondi-500">
+                                    <!-- Dynamic options -->
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-4 text-xs font-semibold text-slate-600">
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Livre</span>
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Reservado</span>
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span> Bloqueado</span>
+                            </div>
+                        </div>
+
+                        <div id="owner-calendar-view" class="max-w-xl mx-auto">
+                            <!-- Calendário interativo por JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Painel 3: Central de Mensagens do Locador -->
+                <div id="owner-panel-messages" class="hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden min-h-[500px]">
+                        <div class="border-r border-slate-100 p-4 bg-slate-50" id="owner-chats-list">
+                            <!-- Chats do proprietário -->
+                        </div>
+                        <div class="lg:col-span-2 flex flex-col h-[550px] bg-white" id="owner-active-chat-box">
+                            <div class="flex-1 flex items-center justify-center text-slate-400 text-xs">
+                                Selecione uma conversa de um cliente para ver as mensagens
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Painel 4: Dashboard Financeiro -->
+                <div id="owner-panel-financial" class="hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Confirmado</span>
+                            <p class="text-3xl font-extrabold text-emerald-600 mt-2" id="finance-confirmed-total">R$ 0,00</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Pendente de Aprovação</span>
+                            <p class="text-3xl font-extrabold text-amber-500 mt-2" id="finance-pending-total">R$ 0,00</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Reservas Concluídas</span>
+                            <p class="text-3xl font-extrabold text-bondi-600 mt-2" id="finance-bookings-count">0</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100">
+                            <h3 class="font-bold text-slate-800 text-sm">Histórico de Negócios e Transações</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                                        <th class="py-3 px-6">Cliente</th>
+                                        <th class="py-3 px-6">Espaço</th>
+                                        <th class="py-3 px-6">Data</th>
+                                        <th class="py-3 px-6">Valor Total</th>
+                                        <th class="py-3 px-6">Status</th>
+                                        <th class="py-3 px-6">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="owner-finance-table-body" class="divide-y divide-slate-100 text-xs">
+                                    <!-- Tabela preenchida via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav id="mobile-nav" class="hidden md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 px-3 py-2 flex justify-around items-center shadow-lg">
+        <button onclick="app.switchRole('client'); app.switchView('client-catalog')" class="flex flex-col items-center gap-1 text-bondi-600">
+            <i class="fa-solid fa-magnifying-glass text-lg"></i>
+            <span class="text-[10px] font-semibold">Explorar</span>
+        </button>
+        <button onclick="app.switchRole('client'); app.switchView('client-profile')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-bondi-600">
+            <i class="fa-solid fa-user text-lg"></i>
+            <span class="text-[10px] font-semibold">Perfil</span>
+        </button>
+        <button onclick="app.switchRole('owner'); app.switchView('owner-dashboard')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-bondi-600">
+            <i class="fa-solid fa-key text-lg"></i>
+            <span class="text-[10px] font-semibold">Locador</span>
+        </button>
+    </nav>
+
+    <!-- MODAL 1: AUTENTICAÇÃO / LOGIN OU REGISTRO RÁPIDO -->
+    <div id="modal-auth" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative">
+            <button onclick="app.closeModal('modal-auth')" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 rounded-2xl gradient-bondi-aqua text-white flex items-center justify-center text-xl mx-auto mb-3 shadow">
+                    <i class="fa-solid fa-user-check"></i>
+                </div>
+                <h3 id="auth-modal-title" class="text-xl font-bold text-slate-800">Acesse sua Conta</h3>
+                <p id="auth-modal-subtitle" class="text-xs text-slate-500 mt-1">Identifique-se para continuar na plataforma</p>
+            </div>
+
+            <form id="auth-form" onsubmit="app.handleAuthSubmit(event)" class="space-y-4">
+                <input type="hidden" id="auth-target-role" value="client">
+                
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nome Completo *</label>
+                    <input type="text" id="auth-name" required placeholder="Ex: Ana Maria" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-bondi-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">E-mail *</label>
+                    <input type="email" id="auth-email" required placeholder="seu@email.com" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-bondi-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Telefone / WhatsApp *</label>
+                    <input type="tel" id="auth-phone" required placeholder="(11) 99999-8888" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-bondi-500">
+                </div>
+
+                <button type="submit" class="w-full py-3 gradient-bondi-aqua text-white font-bold rounded-xl shadow-md hover:opacity-95 transition text-sm mt-2">
+                    Entrar e Continuar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: REGISTRO / EDIÇÃO DE ESPAÇO (PROPRIETÁRIO) -->
+    <div id="modal-space-form" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative my-8">
+            <button onclick="app.closeModal('modal-space-form')" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <h3 id="space-form-title" class="text-xl font-bold text-slate-800 mb-6">Cadastrar Novo Espaço</h3>
+
+            <form id="space-crud-form" onsubmit="app.handleSaveSpace(event)" class="space-y-4">
+                <input type="hidden" id="space-id">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Nome do Espaço *</label>
+                        <input type="text" id="space-title" required placeholder="Ex: Chácara Recanto com Piscina e Campo" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-bondi-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tamanho em m² *</label>
+                        <input type="number" id="space-size" required placeholder="Ex: 500" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-bondi-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Capacidade Máxima de Pessoas *</label>
+                        <input type="number" id="space-capacity" required placeholder="Ex: 150" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-bondi-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Valor da Diária (R$) *</label>
+                        <input type="number" id="space-price" required placeholder="Ex: 1500" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-bondi-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Cidade / Estado *</label>
+                        <input type="text" id="space-location" required placeholder="Ex: Mairiporã - SP" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-bondi-500">
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Endereço Completo & CEP *</label>
+                        <input type="text" id="space-address" required placeholder="Ex: Rua das Flores, 120 - CEP 07600-000" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-bondi-500">
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">URL da Foto de Capa (Unsplash ou Web) *</label>
+                        <input type="url" id="space-image" required placeholder="https://images.unsplash.com/photo-..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-bondi-500">
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tipos de Eventos Suportados (Separados por vírgula) *</label>
+                        <input type="text" id="space-events" required placeholder="Casamento, Aniversário, Corporativo, Formatura" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-bondi-500">
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Formas de Pagamento Aceitas *</label>
+                        <input type="text" id="space-payments" required placeholder="Pix, Cartão de Crédito em até 6x, Boleto" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-bondi-500">
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Descrição do Imóvel *</label>
+                        <textarea id="space-description" rows="3" required placeholder="Descreva infraestrutura, área verde, churrasqueira, banheiros..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-bondi-500"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="app.closeModal('modal-space-form')" class="px-5 py-2.5 bg-slate-100 text-slate-600 font-semibold rounded-xl text-xs hover:bg-slate-200 transition">Cancelar</button>
+                    <button type="submit" class="px-6 py-2.5 gradient-bondi-aqua text-white font-bold rounded-xl text-xs shadow-md hover:opacity-95 transition">Salvar Espaço</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================================
+        // ESTADO DA APLICAÇÃO - agora conectado ao banco de dados (PostgreSQL) via API
+        // Os dados ficam numa cópia local (cache) para a interface continuar rápida;
+        // toda alteração é enviada ao servidor e o site se atualiza sozinho (polling).
+        // =====================================================================
+        const clone = (o) => JSON.parse(JSON.stringify(o));
+
+        class AppState {
+            constructor() {
+                this.currentRole = 'client'; // 'client' ou 'owner'
+                this.currentView = 'welcome';
+                this.currentClientTab = 'chats';
+                this.currentOwnerTab = 'spaces';
+                this.selectedDateForBooking = null;
+
+                this.openChatId = null;
+                this.openChatRole = null;
+                this.openChatCount = 0;
+
+                this.cache = { spaces: [], chats: [], bookings: [] };
+                this.version = 0;      // sobe a cada alteração local (evita o polling sobrescrever)
+                this.pending = 0;      // envios em andamento
+                this.lastSnapshot = '';
+
+                try { this.currentUser = JSON.parse(localStorage.getItem('meu_espaco_user')) || null; }
+                catch (e) { this.currentUser = null; }
+            }
+
+            // ---- Carregamento e atualização automática ----
+            async load() {
+                try {
+                    const res = await fetch('/api/data', { cache: 'no-store' });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    this.cache = this._normalize(await res.json());
+                    this.lastSnapshot = JSON.stringify(this.cache);
+                } catch (err) {
+                    console.error('Não foi possível carregar os dados do servidor:', err);
+                    setTimeout(() => app.showToast('Sem conexão com o servidor. Tente recarregar a página.', 'error'), 500);
+                }
+            }
+
+            _normalize(data) {
+                const d = { spaces: data.spaces || [], chats: data.chats || [], bookings: data.bookings || [] };
+                d.chats.forEach(c => (c.messages || []).forEach((m, i) => { if (!m.mid) m.mid = `${c.id}-${i}`; }));
+                return d;
+            }
+
+            startPolling(intervalMs = 4000) {
+                setInterval(() => this.poll(), intervalMs);
+            }
+
+            async poll() {
+                if (document.hidden || this.pending > 0) return;
+                const versionAtStart = this.version;
+                try {
+                    const res = await fetch('/api/data', { cache: 'no-store' });
+                    if (!res.ok) return;
+                    const fresh = this._normalize(await res.json());
+                    // Se o usuário alterou algo durante a requisição, descarta esta resposta
+                    if (versionAtStart !== this.version || this.pending > 0) return;
+                    const snap = JSON.stringify(fresh);
+                    if (snap !== this.lastSnapshot) {
+                        this.cache = fresh;
+                        this.lastSnapshot = snap;
+                        app.onRemoteUpdate();
+                    }
+                } catch (e) { /* ignora falhas temporárias de rede */ }
+            }
+
+            // ---- Gravação: envia só o que mudou ----
+            _save(collection, arr) {
+                if (collection === 'chats') {
+                    arr.forEach(c => (c.messages || []).forEach(m => {
+                        if (!m.mid) m.mid = `m-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+                    }));
+                }
+                const oldMap = new Map(this.cache[collection].map(x => [x.id, JSON.stringify(x)]));
+                const upsert = arr.filter(x => oldMap.get(x.id) !== JSON.stringify(x));
+                const newIds = new Set(arr.map(x => x.id));
+                const remove = [...oldMap.keys()].filter(id => !newIds.has(id));
+
+                this.cache[collection] = clone(arr);
+                this.version++;
+                if (!upsert.length && !remove.length) return;
+
+                this.pending++;
+                fetch(`/api/sync/${collection}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ upsert, remove })
+                })
+                    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); })
+                    .catch(err => {
+                        console.error('Falha ao salvar:', err);
+                        app.showToast('Não foi possível salvar no servidor.', 'error');
+                    })
+                    .finally(() => { this.pending--; this.lastSnapshot = ''; });
+            }
+
+            getSpaces() { return clone(this.cache.spaces); }
+            saveSpaces(data) { this._save('spaces', data); }
+
+            getChats() { return clone(this.cache.chats); }
+            saveChats(data) { this._save('chats', data); }
+
+            getBookings() { return clone(this.cache.bookings); }
+            saveBookings(data) { this._save('bookings', data); }
+
+            setUser(user) {
+                this.currentUser = user;
+                if (user) {
+                    localStorage.setItem('meu_espaco_user', JSON.stringify(user));
+                } else {
+                    localStorage.removeItem('meu_espaco_user');
+                }
+            }
+
+            registerUser(user) {
+                fetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(user)
+                }).catch(err => console.error('Falha ao registrar usuário:', err));
+            }
+        }
+
+        const state = new AppState();
+
+        const app = {
+            init() {
+                this.renderUserStatus();
+                this.renderFeaturedSpaces();
+                this.filterSpaces();
+                this.setupActiveView();
+            },
+
+            setupActiveView(viewName) {
+                if (viewName) {
+                    this.switchView(viewName);
+                } else {
+                    this.showWelcomeScreen();
+                }
+            },
+
+            // Chamado quando chegam dados novos de outros usuários (via polling)
+            onRemoteUpdate() {
+                const v = state.currentView;
+                try {
+                    if (v === 'welcome') this.renderFeaturedSpaces();
+                    if (v === 'client-catalog') this.filterSpaces();
+                    if (v === 'client-profile' && state.currentUser) {
+                        this.renderClientChats();
+                        this.renderClientBookings();
+                        this.refreshOpenChat('client');
+                    }
+                    if (v === 'owner-dashboard' && state.currentUser) {
+                        const tab = state.currentOwnerTab;
+                        if (tab === 'spaces') this.renderOwnerSpaces();
+                        if (tab === 'calendar') this.renderOwnerCalendar();
+                        if (tab === 'messages') { this.renderOwnerChats(); this.refreshOpenChat('owner'); }
+                        if (tab === 'financial') this.renderOwnerFinancials();
+                    }
+                } catch (e) { console.error(e); }
+            },
+
+            // Atualiza a conversa aberta sem apagar o que a pessoa está digitando
+            refreshOpenChat(role) {
+                if (!state.openChatId || state.openChatRole !== role) return;
+                const chat = state.getChats().find(c => c.id === state.openChatId);
+                if (!chat || chat.messages.length === state.openChatCount) return;
+
+                const input = document.getElementById('chat-input-field');
+                const typed = input ? input.value : '';
+                const hadFocus = input && document.activeElement === input;
+
+                if (role === 'client') this.openClientChat(state.openChatId);
+                else this.openOwnerChat(state.openChatId);
+
+                const fresh = document.getElementById('chat-input-field');
+                if (fresh) { fresh.value = typed; if (hadFocus) fresh.focus(); }
+                this.showToast('Nova mensagem recebida!');
+            },
+
+            showToast(msg, type = 'success') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                const bg = type === 'success' ? 'bg-emerald-600' : type === 'error' ? 'bg-rose-600' : 'bg-bondi-600';
+                
+                toast.className = `${bg} text-white px-5 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-3 transition-all duration-300 pointer-events-auto`;
+                toast.innerHTML = `<i class="fa-solid fa-circle-info text-sm"></i> <span>${msg}</span>`;
+                
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-y-[-10px]');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            },
+
+            // Navegação Inicial
+            showWelcomeScreen() {
+                state.currentView = 'welcome';
+                document.getElementById('view-welcome-screen').classList.remove('hidden');
+                document.getElementById('main-header').classList.add('hidden');
+                document.getElementById('mobile-nav').classList.add('hidden');
+
+                const views = ['client-catalog', 'space-detail', 'client-profile', 'owner-dashboard'];
+                views.forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
+            },
+
+            selectWelcomeOption(role) {
+                document.getElementById('view-welcome-screen').classList.add('hidden');
+                document.getElementById('main-header').classList.remove('hidden');
+                document.getElementById('mobile-nav').classList.remove('hidden');
+
+                if (role === 'owner') {
+                    this.switchRole('owner');
+                } else {
+                    this.switchRole('client');
+                }
+            },
+
+            switchRole(role) {
+                state.currentRole = role;
+                const btnClient = document.getElementById('mode-btn-client');
+                const btnOwner = document.getElementById('mode-btn-owner');
+
+                if (role === 'client') {
+                    btnClient.className = "flex-1 sm:flex-initial px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 bg-white text-bondi-600 shadow-sm";
+                    btnOwner.className = "flex-1 sm:flex-initial px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:text-bondi-600";
+                    this.switchView('client-catalog');
+                } else {
+                    btnOwner.className = "flex-1 sm:flex-initial px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 bg-white text-bondi-600 shadow-sm";
+                    btnClient.className = "flex-1 sm:flex-initial px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:text-bondi-600";
+                    this.switchView('owner-dashboard');
+                }
+                this.renderUserStatus();
+            },
+
+            switchView(viewName) {
+                state.currentView = viewName;
+                const views = ['welcome-screen', 'client-catalog', 'space-detail', 'client-profile', 'owner-dashboard'];
+                
+                views.forEach(v => {
+                    const el = document.getElementById(`view-${v}`);
+                    if (el) el.classList.add('hidden');
+                });
+
+                const target = document.getElementById(`view-${viewName}`);
+                if (target) target.classList.remove('hidden');
+
+                if (viewName === 'owner-dashboard') {
+                    this.checkOwnerDashboardAccess();
+                } else if (viewName === 'client-profile') {
+                    this.renderClientProfile();
+                }
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+
+            renderUserStatus() {
+                const area = document.getElementById('user-status-area');
+                if (!state.currentUser) {
+                    area.innerHTML = `
+                        <button onclick="app.openAuthModal('${state.currentRole}')" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:border-bondi-500 hover:text-bondi-600 font-bold text-xs transition flex items-center gap-2">
+                            <i class="fa-solid fa-right-to-bracket"></i> Entrar / Cadastrar
+                        </button>
+                    `;
+                } else {
+                    area.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <button onclick="app.switchView('${state.currentUser.role === 'owner' ? 'owner-dashboard' : 'client-profile'}')" class="text-xs text-slate-600 font-semibold hover:text-bondi-600 flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-bondi-500 text-white flex items-center justify-center font-bold">
+                                    ${state.currentUser.name.charAt(0).toUpperCase()}
+                                </div>
+                                <span class="hidden sm:inline">${state.currentUser.name} (${state.currentUser.role === 'owner' ? 'Locador' : 'Cliente'})</span>
+                            </button>
+                            <button onclick="app.logout()" class="text-slate-400 hover:text-rose-500 text-sm" title="Sair">
+                                <i class="fa-solid fa-power-off"></i>
+                            </button>
+                        </div>
+                    `;
+                }
+            },
+
+            openAuthModal(targetRole) {
+                document.getElementById('auth-target-role').value = targetRole;
+                document.getElementById('auth-modal-title').textContent = targetRole === 'owner' ? 'Acesso do Locador' : 'Acesso do Cliente';
+                document.getElementById('auth-modal-subtitle').textContent = targetRole === 'owner' ? 'Cadastre-se ou entre para gerenciar seus imóveis.' : 'Identifique-se para entrar em contato com os proprietários.';
+                document.getElementById('modal-auth').classList.remove('hidden');
+            },
+
+            closeModal(modalId) {
+                document.getElementById(modalId).classList.add('hidden');
+            },
+
+            handleAuthSubmit(e) {
+                e.preventDefault();
+                const role = document.getElementById('auth-target-role').value;
+                const name = document.getElementById('auth-name').value;
+                const email = document.getElementById('auth-email').value.trim().toLowerCase();
+                const phone = document.getElementById('auth-phone').value;
+
+                const user = { name, email, phone, role };
+                state.setUser(user);
+                state.registerUser(user);
+
+                this.closeModal('modal-auth');
+                this.renderUserStatus();
+                this.showToast(`Bem-vindo, ${name}!`);
+
+                if (role === 'owner') {
+                    this.switchRole('owner');
+                } else if (state.currentView === 'client-profile') {
+                    this.renderClientProfile();
+                }
+            },
+
+            logout() {
+                state.setUser(null);
+                this.renderUserStatus();
+                this.showToast('Você saiu da sua conta.');
+                this.switchRole('client');
+            },
+
+            updatePriceLabel(val) {
+                document.getElementById('price-val-display').textContent = `R$ ${parseInt(val).toLocaleString('pt-BR')}`;
+            },
+
+            clearFilters() {
+                document.getElementById('filter-location').value = '';
+                document.getElementById('filter-event-type').value = '';
+                document.getElementById('filter-capacity').value = '0';
+                document.getElementById('filter-price-range').value = '5000';
+                this.updatePriceLabel(5000);
+                this.filterSpaces();
+            },
+
+            renderFeaturedSpaces() {
+                const spaces = state.getSpaces().slice(0, 3);
+                const container = document.getElementById('featured-spaces-container');
+                
+                container.innerHTML = spaces.map(sp => `
+                    <div onclick="app.showSpaceDetail('${sp.id}')" class="bg-white rounded-2xl p-3 border border-slate-200/80 hover:border-bondi-500 shadow-sm hover:shadow-md transition cursor-pointer flex items-center gap-3">
+                        <img src="${sp.image}" class="w-16 h-16 rounded-xl object-cover">
+                        <div class="overflow-hidden">
+                            <span class="text-[10px] font-bold text-bondi-600 uppercase">${sp.location}</span>
+                            <h4 class="font-bold text-slate-800 text-xs truncate">${sp.title}</h4>
+                            <span class="text-xs font-extrabold text-slate-700">R$ ${sp.price.toLocaleString('pt-BR')} / dia</span>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            filterSpaces() {
+                const locationQuery = document.getElementById('filter-location').value.toLowerCase();
+                const eventType = document.getElementById('filter-event-type').value;
+                const minCapacity = parseInt(document.getElementById('filter-capacity').value) || 0;
+                const maxPrice = parseInt(document.getElementById('filter-price-range').value) || 5000;
+
+                const spaces = state.getSpaces();
+
+                const filtered = spaces.filter(sp => {
+                    const matchLoc = !locationQuery || sp.location.toLowerCase().includes(locationQuery) || sp.title.toLowerCase().includes(locationQuery);
+                    const matchEvent = !eventType || (sp.events && sp.events.includes(eventType));
+                    const matchCap = sp.capacity >= minCapacity;
+                    const matchPrice = sp.price <= maxPrice;
+
+                    return matchLoc && matchEvent && matchCap && matchPrice;
+                });
+
+                this.renderSpacesGrid(filtered);
+            },
+
+            renderSpacesGrid(spaces) {
+                const container = document.getElementById('spaces-grid');
+                const noResults = document.getElementById('no-results');
+                const countDisplay = document.getElementById('results-count');
+
+                countDisplay.textContent = `Mostrando ${spaces.length} ${spaces.length === 1 ? 'opção' : 'opções'}`;
+
+                if (spaces.length === 0) {
+                    container.innerHTML = '';
+                    noResults.classList.remove('hidden');
+                    return;
+                }
+
+                noResults.classList.add('hidden');
+                container.innerHTML = spaces.map(sp => `
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group">
+                        <div class="relative h-48 overflow-hidden bg-slate-100">
+                            <img src="${sp.image}" alt="${sp.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1000&q=80'">
+                            <span class="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-bondi-700 shadow">
+                                ${sp.size} m²
+                            </span>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center text-xs text-slate-400 gap-1 mb-1 font-medium">
+                                    <i class="fa-solid fa-location-dot text-bondi-500"></i> ${sp.location}
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-base mb-2 line-clamp-1 group-hover:text-bondi-600 transition">${sp.title}</h3>
+                                
+                                <div class="flex items-center gap-4 text-xs font-semibold text-slate-600 my-3 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-users text-aqua-600"></i> Até ${sp.capacity} pessoas</span>
+                                </div>
+
+                                <div class="flex flex-wrap gap-1 mb-4">
+                                    ${(sp.events || []).slice(0, 3).map(e => `<span class="bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded-md font-medium">${e}</span>`).join('')}
+                                </div>
+                            </div>
+
+                            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                <div>
+                                    <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">Valor Diária</span>
+                                    <span class="text-lg font-extrabold text-bondi-600">R$ ${sp.price.toLocaleString('pt-BR')}</span>
+                                </div>
+                                <button onclick="app.showSpaceDetail('${sp.id}')" class="px-4 py-2 bg-bondi-50 hover:bg-bondi-500 hover:text-white text-bondi-600 font-bold rounded-xl text-xs transition duration-200">
+                                    Ver Detalhes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            showSpaceDetail(spaceId) {
+                const space = state.getSpaces().find(s => s.id === spaceId);
+                if (!space) return;
+
+                const container = document.getElementById('space-detail-container');
+
+                container.innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Imagem & Detalhes -->
+                        <div class="lg:col-span-2 space-y-6">
+                            <div class="relative h-80 sm:h-96 rounded-3xl overflow-hidden shadow-lg border border-slate-100">
+                                <img src="${space.image}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1000&q=80'">
+                            </div>
+
+                            <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-5">
+                                <div class="flex justify-between items-start flex-wrap gap-2">
+                                    <div>
+                                        <span class="text-xs font-bold text-bondi-600 uppercase tracking-wider">${space.location}</span>
+                                        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-800">${space.title}</h1>
+                                        <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-map-pin text-rose-500"></i> ${space.address || 'Endereço fornecido ao contatar'}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-xs text-slate-400 block font-semibold">Valor por Diária</span>
+                                        <span class="text-3xl font-extrabold text-bondi-600">R$ ${space.price.toLocaleString('pt-BR')}</span>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-100">
+                                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                                        <span class="text-[10px] text-slate-400 uppercase font-bold block">Tamanho</span>
+                                        <span class="text-sm font-bold text-slate-700">${space.size} m²</span>
+                                    </div>
+                                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                                        <span class="text-[10px] text-slate-400 uppercase font-bold block">Capacidade</span>
+                                        <span class="text-sm font-bold text-slate-700">${space.capacity} pessoas</span>
+                                    </div>
+                                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 col-span-2 sm:col-span-1">
+                                        <span class="text-[10px] text-slate-400 uppercase font-bold block">Proprietário</span>
+                                        <span class="text-sm font-bold text-slate-700">${space.ownerName || 'Locador Parceiro'}</span>
+                                    </div>
+                                </div>
+
+                                <div class="pt-4 border-t border-slate-100">
+                                    <h3 class="font-bold text-slate-800 text-sm mb-2">Descrição do Local</h3>
+                                    <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">${space.description}</p>
+                                </div>
+
+                                <div class="pt-4 border-t border-slate-100">
+                                    <h3 class="font-bold text-slate-800 text-sm mb-2">Eventos Aceitos</h3>
+                                    <div class="flex flex-wrap gap-2">
+                                        ${(space.events || []).map(e => `<span class="bg-bondi-50 text-bondi-700 text-xs font-semibold px-3 py-1 rounded-full border border-bondi-100">${e}</span>`).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="pt-4 border-t border-slate-100">
+                                    <h3 class="font-bold text-slate-800 text-sm mb-1">Formas de Pagamento</h3>
+                                    <p class="text-xs text-slate-500">${space.payments || 'A combinar com o proprietário'}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sidebar Calendário & Contato -->
+                        <div class="space-y-6">
+                            <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-md sticky top-28">
+                                <h3 class="font-bold text-slate-800 text-base mb-1">Calendário do Imóvel</h3>
+                                <p class="text-xs text-slate-400 mb-4">Consulte as datas disponíveis em tempo real</p>
+
+                                <div id="public-calendar-grid" class="mb-6">
+                                    ${this.buildPublicCalendarHTML(space.calendar || {}, space.id)}
+                                </div>
+
+                                <div class="space-y-3 pt-4 border-t border-slate-100">
+                                    <button onclick="app.startContactWithOwner('${space.id}')" class="w-full py-3.5 gradient-bondi-aqua text-white font-bold rounded-2xl shadow-lg hover:opacity-95 transition flex items-center justify-center gap-2 text-xs sm:text-sm">
+                                        <i class="fa-solid fa-comment-dots text-base"></i> Conversar com Proprietário
+                                    </button>
+                                    <p class="text-[10px] text-center text-slate-400">
+                                        Navegação livre. Para enviar mensagens é necessário um login rápido.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                this.switchView('space-detail');
+            },
+
+            buildPublicCalendarHTML(calendarData, spaceId) {
+                const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+                let html = `
+                    <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 mb-2">
+                        ${days.map(d => `<div>${d}</div>`).join('')}
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold">
+                `;
+
+                for (let i = 1; i <= 31; i++) {
+                    const dayStr = i < 10 ? `0${i}` : `${i}`;
+                    const dateKey = `2026-10-${dayStr}`;
+                    const status = calendarData[dateKey] || 'available';
+
+                    let bgClass = 'bg-emerald-50 text-emerald-700 border-emerald-200 cursor-pointer hover:bg-emerald-100';
+                    let label = i;
+
+                    if (status === 'booked') {
+                        bgClass = 'bg-amber-100 text-amber-800 border-amber-300 opacity-80 cursor-not-allowed';
+                    } else if (status === 'blocked') {
+                        bgClass = 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed';
+                    }
+
+                    html += `
+                        <div onclick="app.selectDateForBooking('${spaceId}', '${dateKey}', '${status}')" class="${bgClass} border py-2 rounded-lg flex items-center justify-center font-mono transition">
+                            ${label}
+                        </div>
+                    `;
+                }
+
+                html += `</div>
+                <div class="flex justify-between items-center text-[10px] font-medium text-slate-500 mt-3 pt-2 border-t border-slate-100">
+                    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Livre</span>
+                    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Reservado</span>
+                    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-slate-400"></span> Indisponível</span>
+                </div>`;
+
+                return html;
+            },
+
+            selectDateForBooking(spaceId, dateKey, status) {
+                if (status !== 'available') {
+                    this.showToast('Esta data já se encontra indisponível ou reservada.', 'error');
+                    return;
+                }
+                state.selectedDateForBooking = dateKey;
+                this.showToast(`Data ${dateKey} selecionada! Clique em Conversar com Proprietário para solicitar a reserva.`);
+            },
+
+            startContactWithOwner(spaceId) {
+                if (!state.currentUser) {
+                    this.showToast('Faça um login rápido para iniciar a conversa.', 'info');
+                    this.openAuthModal('client');
+                    return;
+                }
+
+                const space = state.getSpaces().find(s => s.id === spaceId);
+                if (!space) return;
+
+                let chats = state.getChats();
+                let chat = chats.find(c => c.spaceId === spaceId && c.clientEmail === state.currentUser.email);
+
+                const dateInfo = state.selectedDateForBooking ? ` para a data ${state.selectedDateForBooking}` : '';
+
+                if (!chat) {
+                    chat = {
+                        id: `chat-${Date.now()}`,
+                        spaceId: space.id,
+                        spaceTitle: space.title,
+                        clientEmail: state.currentUser.email,
+                        clientName: state.currentUser.name,
+                        ownerEmail: space.ownerEmail,
+                        messages: [
+                            {
+                                sender: 'client',
+                                text: `Olá! Tenho interesse no espaço "${space.title}"${dateInfo}. Como podemos negociar a reserva?`,
+                                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                            }
+                        ]
+                    };
+                    chats.push(chat);
+                    state.saveChats(chats);
+                }
+
+                this.switchRole('client');
+                this.switchView('client-profile');
+                this.switchClientTab('chats');
+                this.openClientChat(chat.id);
+            },
+
+            renderClientProfile() {
+                if (!state.currentUser) {
+                    this.openAuthModal('client');
+                    return;
+                }
+
+                document.getElementById('client-profile-name').textContent = state.currentUser.name;
+                document.getElementById('client-profile-email').textContent = state.currentUser.email;
+                document.getElementById('client-avatar-letter').textContent = state.currentUser.name.charAt(0).toUpperCase();
+
+                this.renderClientChats();
+                this.renderClientBookings();
+            },
+
+            switchClientTab(tab) {
+                state.currentClientTab = tab;
+                const tabChats = document.getElementById('client-tab-chats');
+                const tabBookings = document.getElementById('client-tab-bookings');
+                const btnChats = document.getElementById('tab-btn-chats');
+                const btnBookings = document.getElementById('tab-btn-bookings');
+
+                if (tab === 'chats') {
+                    tabChats.classList.remove('hidden');
+                    tabBookings.classList.add('hidden');
+                    btnChats.className = "px-6 py-3 font-semibold text-xs sm:text-sm border-b-2 border-bondi-500 text-bondi-600 flex items-center gap-2";
+                    btnBookings.className = "px-6 py-3 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2";
+                } else {
+                    tabBookings.classList.remove('hidden');
+                    tabChats.classList.add('hidden');
+                    btnBookings.className = "px-6 py-3 font-semibold text-xs sm:text-sm border-b-2 border-bondi-500 text-bondi-600 flex items-center gap-2";
+                    btnChats.className = "px-6 py-3 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2";
+                }
+            },
+
+            renderClientChats() {
+                const chats = state.getChats().filter(c => c.clientEmail === state.currentUser?.email);
+                const listEl = document.getElementById('client-chats-list');
+
+                if (chats.length === 0) {
+                    listEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">Nenhuma conversa iniciada.</p>`;
+                    return;
+                }
+
+                listEl.innerHTML = chats.map(c => `
+                    <div onclick="app.openClientChat('${c.id}')" class="p-3 bg-white rounded-xl border border-slate-200 hover:border-bondi-500 cursor-pointer mb-2 transition shadow-sm">
+                        <h4 class="font-bold text-xs text-slate-800 line-clamp-1">${c.spaceTitle}</h4>
+                        <p class="text-[11px] text-slate-500 line-clamp-1 mt-1">${c.messages[c.messages.length - 1]?.text || 'Sem mensagens'}</p>
+                    </div>
+                `).join('');
+            },
+
+            openClientChat(chatId) {
+                const chat = state.getChats().find(c => c.id === chatId);
+                if (!chat) return;
+                state.openChatId = chatId; state.openChatRole = 'client'; state.openChatCount = chat.messages.length;
+
+                const box = document.getElementById('client-active-chat-box');
+
+                box.innerHTML = `
+                    <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                        <div>
+                            <h3 class="font-bold text-xs sm:text-sm text-slate-800">${chat.spaceTitle}</h3>
+                            <span class="text-[10px] text-slate-400">Conversa com o Locador</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1 p-4 overflow-y-auto space-y-3 custom-scrollbar" id="chat-messages-container">
+                        ${chat.messages.map(m => `
+                            <div class="flex ${m.sender === 'client' ? 'justify-end' : 'justify-start'}">
+                                <div class="max-w-[80%] rounded-2xl px-4 py-2 text-xs ${m.sender === 'client' ? 'bg-bondi-500 text-white rounded-br-none' : 'bg-slate-100 text-slate-700 rounded-bl-none'}">
+                                    <p>${m.text}</p>
+                                    <span class="text-[9px] opacity-75 block text-right mt-1">${m.timestamp}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="p-3 border-t border-slate-100 bg-white">
+                        <form onsubmit="app.sendMessage(event, '${chat.id}', 'client')" class="flex gap-2">
+                            <input type="text" id="chat-input-field" required placeholder="Digite sua mensagem..." class="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-bondi-500">
+                            <button type="submit" class="px-4 py-2 gradient-bondi-aqua text-white rounded-xl text-xs font-bold shadow hover:opacity-95">
+                                Enviar <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                `;
+
+                const msgContainer = document.getElementById('chat-messages-container');
+                msgContainer.scrollTop = msgContainer.scrollHeight;
+            },
+
+            sendMessage(e, chatId, senderRole) {
+                e.preventDefault();
+                const input = document.getElementById('chat-input-field');
+                const text = input.value.trim();
+                if (!text) return;
+
+                let chats = state.getChats();
+                const chatIndex = chats.findIndex(c => c.id === chatId);
+                if (chatIndex === -1) return;
+
+                const newMsg = {
+                    sender: senderRole,
+                    text: text,
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                };
+
+                chats[chatIndex].messages.push(newMsg);
+                state.saveChats(chats);
+                input.value = '';
+
+                if (senderRole === 'client') {
+                    this.openClientChat(chatId);
+                } else {
+                    this.openOwnerChat(chatId);
+                }
+            },
+
+            renderClientBookings() {
+                const bookings = state.getBookings().filter(b => b.clientEmail === state.currentUser?.email);
+                const container = document.getElementById('client-bookings-grid');
+
+                if (bookings.length === 0) {
+                    container.innerHTML = `<p class="text-xs text-slate-400 col-span-2 text-center py-10">Nenhum negócio fechado até o momento.</p>`;
+                    return;
+                }
+
+                container.innerHTML = bookings.map(b => `
+                    <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="bg-emerald-100 text-emerald-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase">
+                                    Reserva Confirmada
+                                </span>
+                                <span class="text-[10px] text-slate-400 font-mono">#${b.id}</span>
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-sm sm:text-base">${b.spaceTitle}</h3>
+                            <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-calendar text-bondi-500"></i> Data Reservada: <strong>${b.date}</strong></p>
+                        </div>
+                        <div class="pt-4 border-t border-slate-100 mt-4 flex justify-between items-center">
+                            <span class="text-xs text-slate-400 font-semibold">Valor Acertado</span>
+                            <span class="text-base font-extrabold text-bondi-600">R$ ${b.price.toLocaleString('pt-BR')}</span>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            // Lógica do Proprietário / Locador
+            checkOwnerDashboardAccess() {
+                const authGuard = document.getElementById('owner-auth-guard');
+                const contentPanel = document.getElementById('owner-content-panel');
+
+                if (!state.currentUser || state.currentUser.role !== 'owner') {
+                    authGuard.classList.remove('hidden');
+                    contentPanel.classList.add('hidden');
+                } else {
+                    authGuard.classList.add('hidden');
+                    contentPanel.classList.remove('hidden');
+                    this.renderOwnerSpaces();
+                    this.setupOwnerCalendarSelect();
+                    this.renderOwnerChats();
+                    this.renderOwnerFinancials();
+                }
+            },
+
+            switchOwnerTab(tab) {
+                state.currentOwnerTab = tab;
+                const tabs = ['spaces', 'calendar', 'messages', 'financial'];
+                
+                tabs.forEach(t => {
+                    document.getElementById(`owner-panel-${t}`).classList.add('hidden');
+                    const btn = document.getElementById(`owner-tab-${t}`);
+                    if (btn) {
+                        btn.className = "px-6 py-3 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap";
+                    }
+                });
+
+                document.getElementById(`owner-panel-${tab}`).classList.remove('hidden');
+                const activeBtn = document.getElementById(`owner-tab-${tab}`);
+                if (activeBtn) {
+                    activeBtn.className = "px-6 py-3 font-semibold text-xs sm:text-sm border-b-2 border-bondi-500 text-bondi-600 flex items-center gap-2 whitespace-nowrap";
+                }
+
+                if (tab === 'calendar') this.renderOwnerCalendar();
+            },
+
+            renderOwnerSpaces() {
+                const mySpaces = state.getSpaces().filter(s => s.ownerEmail === state.currentUser?.email);
+                const container = document.getElementById('owner-spaces-list');
+
+                if (mySpaces.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-span-3 text-center py-12 bg-white rounded-3xl border border-dashed border-slate-200">
+                            <i class="fa-solid fa-building-circle-plus text-3xl text-slate-300 mb-2"></i>
+                            <h3 class="font-bold text-slate-700 text-sm">Nenhum imóvel cadastrado</h3>
+                            <p class="text-xs text-slate-400 mt-1 mb-4">Anuncie seu espaço para começar a receber propostas.</p>
+                            <button onclick="app.openSpaceModal()" class="px-4 py-2 gradient-bondi-aqua text-white text-xs font-bold rounded-xl shadow">
+                                Cadastrar Imóvel
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = mySpaces.map(sp => `
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col justify-between">
+                        <div>
+                            <div class="h-40 bg-slate-100 relative">
+                                <img src="${sp.image}" class="w-full h-full object-cover">
+                                <span class="absolute top-2 right-2 bg-slate-900/70 text-white text-[10px] px-2 py-0.5 rounded-md font-mono">${sp.size} m²</span>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-bold text-slate-800 text-sm line-clamp-1">${sp.title}</h3>
+                                <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-dot text-bondi-500"></i> ${sp.location}</p>
+                                <p class="text-sm font-extrabold text-bondi-600 mt-2">R$ ${sp.price.toLocaleString('pt-BR')} / dia</p>
+                            </div>
+                        </div>
+                        <div class="p-4 pt-0 flex gap-2 border-t border-slate-100 pt-3">
+                            <button onclick="app.openSpaceModal('${sp.id}')" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">Editar</button>
+                            <button onclick="app.deleteSpace('${sp.id}')" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold transition"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            openSpaceModal(spaceId = null) {
+                const modal = document.getElementById('modal-space-form');
+                const form = document.getElementById('space-crud-form');
+                
+                if (spaceId) {
+                    const space = state.getSpaces().find(s => s.id === spaceId);
+                    if (!space) return;
+                    document.getElementById('space-form-title').textContent = 'Editar Espaço';
+                    document.getElementById('space-id').value = space.id;
+                    document.getElementById('space-title').value = space.title;
+                    document.getElementById('space-size').value = space.size;
+                    document.getElementById('space-capacity').value = space.capacity;
+                    document.getElementById('space-price').value = space.price;
+                    document.getElementById('space-location').value = space.location;
+                    document.getElementById('space-address').value = space.address || '';
+                    document.getElementById('space-image').value = space.image;
+                    document.getElementById('space-events').value = (space.events || []).join(', ');
+                    document.getElementById('space-payments').value = space.payments || '';
+                    document.getElementById('space-description').value = space.description || '';
+                } else {
+                    document.getElementById('space-form-title').textContent = 'Cadastrar Novo Espaço';
+                    form.reset();
+                    document.getElementById('space-id').value = '';
+                }
+
+                modal.classList.remove('hidden');
+            },
+
+            handleSaveSpace(e) {
+                e.preventDefault();
+                const id = document.getElementById('space-id').value;
+                let spaces = state.getSpaces();
+
+                const spaceData = {
+                    id: id || `spc-${Date.now()}`,
+                    ownerEmail: state.currentUser.email,
+                    ownerName: state.currentUser.name,
+                    title: document.getElementById('space-title').value,
+                    size: parseInt(document.getElementById('space-size').value),
+                    capacity: parseInt(document.getElementById('space-capacity').value),
+                    price: parseFloat(document.getElementById('space-price').value),
+                    location: document.getElementById('space-location').value,
+                    address: document.getElementById('space-address').value,
+                    image: document.getElementById('space-image').value,
+                    events: document.getElementById('space-events').value.split(',').map(s => s.trim()).filter(Boolean),
+                    payments: document.getElementById('space-payments').value,
+                    description: document.getElementById('space-description').value,
+                    calendar: id ? (spaces.find(s => s.id === id)?.calendar || {}) : {}
+                };
+
+                if (id) {
+                    const idx = spaces.findIndex(s => s.id === id);
+                    if (idx !== -1) spaces[idx] = spaceData;
+                } else {
+                    spaces.push(spaceData);
+                }
+
+                state.saveSpaces(spaces);
+                this.closeModal('modal-space-form');
+                this.renderOwnerSpaces();
+                this.renderFeaturedSpaces();
+                this.filterSpaces();
+                this.showToast('Espaço salvo com sucesso!');
+            },
+
+            deleteSpace(spaceId) {
+                if (!confirm('Deseja excluir este imóvel?')) return;
+                let spaces = state.getSpaces().filter(s => s.id !== spaceId);
+                state.saveSpaces(spaces);
+                this.renderOwnerSpaces();
+                this.renderFeaturedSpaces();
+                this.filterSpaces();
+                this.showToast('Espaço excluído.');
+            },
+
+            setupOwnerCalendarSelect() {
+                const select = document.getElementById('calendar-space-select');
+                const mySpaces = state.getSpaces().filter(s => s.ownerEmail === state.currentUser?.email);
+
+                select.innerHTML = mySpaces.map(s => `<option value="${s.id}">${s.title}</option>`).join('');
+                this.renderOwnerCalendar();
+            },
+
+            renderOwnerCalendar() {
+                const select = document.getElementById('calendar-space-select');
+                const spaceId = select.value;
+                const container = document.getElementById('owner-calendar-view');
+
+                if (!spaceId) {
+                    container.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">Cadastre um imóvel para gerenciar o calendário.</p>`;
+                    return;
+                }
+
+                const space = state.getSpaces().find(s => s.id === spaceId);
+                const calendar = space.calendar || {};
+
+                const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+                let html = `
+                    <p class="text-xs text-slate-500 mb-3 text-center">Clique na data para alternar: <strong>Livre &rarr; Reservado &rarr; Bloqueado</strong></p>
+                    <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-slate-400 mb-2">
+                        ${days.map(d => `<div>${d}</div>`).join('')}
+                    </div>
+                    <div class="grid grid-cols-7 gap-2 text-center text-xs font-semibold">
+                `;
+
+                for (let i = 1; i <= 31; i++) {
+                    const dayStr = i < 10 ? `0${i}` : `${i}`;
+                    const dateKey = `2026-10-${dayStr}`;
+                    const status = calendar[dateKey] || 'available';
+
+                    let color = 'bg-emerald-500 text-white hover:bg-emerald-600';
+                    if (status === 'booked') color = 'bg-amber-500 text-white hover:bg-amber-600';
+                    if (status === 'blocked') color = 'bg-rose-500 text-white hover:bg-rose-600';
+
+                    html += `
+                        <button onclick="app.toggleDateStatus('${spaceId}', '${dateKey}')" class="${color} py-3 rounded-xl font-mono shadow-sm transition transform hover:scale-105">
+                            ${i}
+                        </button>
+                    `;
+                }
+
+                html += `</div>`;
+                container.innerHTML = html;
+            },
+
+            toggleDateStatus(spaceId, dateKey) {
+                let spaces = state.getSpaces();
+                const space = spaces.find(s => s.id === spaceId);
+                if (!space) return;
+
+                if (!space.calendar) space.calendar = {};
+                const current = space.calendar[dateKey] || 'available';
+
+                let next = 'booked';
+                if (current === 'booked') next = 'blocked';
+                else if (current === 'blocked') next = 'available';
+
+                space.calendar[dateKey] = next;
+                state.saveSpaces(spaces);
+                this.renderOwnerCalendar();
+                this.showToast(`Status do dia ${dateKey} atualizado para ${next.toUpperCase()}`);
+            },
+
+            renderOwnerChats() {
+                const chats = state.getChats().filter(c => c.ownerEmail === state.currentUser?.email);
+                const listEl = document.getElementById('owner-chats-list');
+
+                if (chats.length === 0) {
+                    listEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">Nenhuma mensagem recebida.</p>`;
+                    return;
+                }
+
+                listEl.innerHTML = chats.map(c => `
+                    <div onclick="app.openOwnerChat('${c.id}')" class="p-3 bg-white rounded-xl border border-slate-200 hover:border-bondi-500 cursor-pointer mb-2 transition shadow-sm">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-xs text-slate-800">${c.clientName}</span>
+                        </div>
+                        <span class="text-[10px] text-bondi-600 font-semibold block">${c.spaceTitle}</span>
+                        <p class="text-[11px] text-slate-500 line-clamp-1 mt-1">${c.messages[c.messages.length - 1]?.text || ''}</p>
+                    </div>
+                `).join('');
+            },
+
+            openOwnerChat(chatId) {
+                const chat = state.getChats().find(c => c.id === chatId);
+                if (!chat) return;
+                state.openChatId = chatId; state.openChatRole = 'owner'; state.openChatCount = chat.messages.length;
+
+                const box = document.getElementById('owner-active-chat-box');
+
+                box.innerHTML = `
+                    <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                        <div>
+                            <h3 class="font-bold text-xs sm:text-sm text-slate-800">Cliente: ${chat.clientName}</h3>
+                            <span class="text-[10px] text-slate-400">Espaço: ${chat.spaceTitle}</span>
+                        </div>
+                        <button onclick="app.createBookingFromChat('${chat.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow">
+                            <i class="fa-solid fa-check"></i> Fechar Negócio
+                        </button>
+                    </div>
+                    
+                    <div class="flex-1 p-4 overflow-y-auto space-y-3 custom-scrollbar" id="owner-chat-messages-container">
+                        ${chat.messages.map(m => `
+                            <div class="flex ${m.sender === 'owner' ? 'justify-end' : 'justify-start'}">
+                                <div class="max-w-[80%] rounded-2xl px-4 py-2 text-xs ${m.sender === 'owner' ? 'bg-bondi-500 text-white rounded-br-none' : 'bg-slate-100 text-slate-700 rounded-bl-none'}">
+                                    <p>${m.text}</p>
+                                    <span class="text-[9px] opacity-75 block text-right mt-1">${m.timestamp}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="p-3 border-t border-slate-100 bg-white">
+                        <form onsubmit="app.sendMessage(event, '${chat.id}', 'owner')" class="flex gap-2">
+                            <input type="text" id="chat-input-field" required placeholder="Responder cliente..." class="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-bondi-500">
+                            <button type="submit" class="px-4 py-2 gradient-bondi-aqua text-white rounded-xl text-xs font-bold shadow hover:opacity-95">
+                                Responder <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                `;
+
+                const msgContainer = document.getElementById('owner-chat-messages-container');
+                msgContainer.scrollTop = msgContainer.scrollHeight;
+            },
+
+            createBookingFromChat(chatId) {
+                const chat = state.getChats().find(c => c.id === chatId);
+                const space = state.getSpaces().find(s => s.id === chat.spaceId);
+                if (!chat || !space) return;
+
+                let bookings = state.getBookings();
+                const newBooking = {
+                    id: `res-${Date.now()}`,
+                    spaceId: space.id,
+                    spaceTitle: space.title,
+                    clientEmail: chat.clientEmail,
+                    clientName: chat.clientName,
+                    ownerEmail: space.ownerEmail,
+                    date: "2026-10-25",
+                    price: space.price,
+                    status: "confirmed"
+                };
+
+                bookings.push(newBooking);
+                state.saveBookings(bookings);
+                this.showToast('Negócio fechado e reserva confirmada!');
+                this.renderOwnerFinancials();
+            },
+
+            renderOwnerFinancials() {
+                const bookings = state.getBookings().filter(b => b.ownerEmail === state.currentUser?.email);
+
+                const confirmed = bookings.filter(b => b.status === 'confirmed');
+                const pending = bookings.filter(b => b.status === 'pending');
+
+                const totalConfirmed = confirmed.reduce((acc, b) => acc + b.price, 0);
+                const totalPending = pending.reduce((acc, b) => acc + b.price, 0);
+
+                document.getElementById('finance-confirmed-total').textContent = `R$ ${totalConfirmed.toLocaleString('pt-BR')}`;
+                document.getElementById('finance-pending-total').textContent = `R$ ${totalPending.toLocaleString('pt-BR')}`;
+                document.getElementById('finance-bookings-count').textContent = confirmed.length;
+
+                const tableBody = document.getElementById('owner-finance-table-body');
+                if (bookings.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400 text-xs">Nenhum registro até o momento.</td></tr>`;
+                    return;
+                }
+
+                tableBody.innerHTML = bookings.map(b => `
+                    <tr class="hover:bg-slate-50">
+                        <td class="py-3 px-6 font-semibold">${b.clientName}</td>
+                        <td class="py-3 px-6 text-slate-600">${b.spaceTitle}</td>
+                        <td class="py-3 px-6 font-mono text-[11px]">${b.date}</td>
+                        <td class="py-3 px-6 font-bold text-bondi-600">R$ ${b.price.toLocaleString('pt-BR')}</td>
+                        <td class="py-3 px-6">
+                            <span class="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${b.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                                ${b.status === 'confirmed' ? 'Confirmado' : 'Pendente'}
+                            </span>
+                        </td>
+                        <td class="py-3 px-6">
+                            ${b.status === 'pending' ? `<button onclick="app.confirmBooking('${b.id}')" class="text-xs bg-emerald-500 text-white px-2 py-1 rounded-lg font-bold">Aprovar</button>` : '<i class="fa-solid fa-check text-emerald-500"></i>'}
+                        </td>
+                    </tr>
+                `).join('');
+            },
+
+            confirmBooking(bookingId) {
+                let bookings = state.getBookings();
+                const b = bookings.find(x => x.id === bookingId);
+                if (b) {
+                    b.status = 'confirmed';
+                    state.saveBookings(bookings);
+                    this.renderOwnerFinancials();
+                    this.showToast('Reserva confirmada!');
+                }
+            }
+        };
+
+        // Inicialização Global
+        window.onload = async function() {
+            await state.load();
+            app.init();
+            state.startPolling();
+        };
+    </script>
+</body>
+</html>
